@@ -6,7 +6,7 @@ env:
 
 jobs:
   mac-editor:
-    runs-on: "macos-latest"
+    runs-on: "macos-13"
     name: macOS Headless (target=release_debug, tools=yes)
     
     steps:
