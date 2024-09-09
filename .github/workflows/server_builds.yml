@@ -1,9 +1,8 @@
-name: ☁ Headless Builds
+name: Headless Builds
 on: [push]
 
 env:
-  GODOT_VERSION: 4.2.1-stable
-  VULKAN_VERSION: 1.3.268.1
+  VERSION: 3.6-stable
 
 jobs:
   mac-editor:
@@ -15,19 +14,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
-      - name: Install Vulkan SDK
-        run : |
-          wget https://sdk.lunarg.com/sdk/download/${{ env.VULKAN_VERSION }}/mac/vulkansdk-macos-${{ env.VULKAN_VERSION }}.dmg
-          hdiutil attach vulkansdk-macos-${{ env.VULKAN_VERSION }}.dmg
-          cd /Volumes/vulkansdk-macos-${{ env.VULKAN_VERSION }}
-          ls -la
-          sudo ./InstallVulkan.app/Contents/MacOS/InstallVulkan --root ~/VulkanSDK/${{ env.VULKAN_VERSION }} --accept-licenses --default-answer --confirm-command install 
-
       - name: Get latest stable Godot source code
-        run: wget https://github.com/godotengine/godot/releases/download/${{ env.GODOT_VERSION }}/godot-${{ env.GODOT_VERSION }}.tar.xz
+        run: wget https://github.com/godotengine/godot/releases/download/${{ env.VERSION }}/godot-${{ env.VERSION }}.tar.xz
 
       - name: Extract Godot source code
-        run: tar xvf godot-${{ env.GODOT_VERSION }}.tar.xz --strip-components=1
+        run: tar xvf godot-${{ env.VERSION }}.tar.xz --strip-components=1
         
       - name: Install scons and yasm
         run: brew install scons yasm
@@ -37,16 +28,16 @@ jobs:
 
       - name: Compile
         run: |
-          scons platform=macos target=editor arch=x86_64 use_static_cpp=no -j 8
-          mv ./bin/godot.macos.editor.x86_64 ./bin/godot
+          scons platform=server tools=yes use_static_cpp=no -j 8
+          mv ./bin/godot_server.osx.tools.64 ./bin/godot
           zip ./bin/godot.zip ./bin/godot
       - name: Upload binaries to release
         uses: svenstaro/upload-release-action@v2
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           file: ./bin/godot.zip
-          asset_name: Godot_v${{ env.GODOT_VERSION }}_mac_headless.64.zip
-          tag: ${{ env.GODOT_VERSION }}
+          asset_name: Godot_v${{ env.VERSION }}_mac_headless.64.zip
+          tag: ${{ env.VERSION }}
           overwrite: true
-          body: "Headless build of Godot ${{ env.GODOT_VERSION }} for macOS.
-See details about the release [here](https://github.com/godotengine/godot/releases/tag/${{ env.GODOT_VERSION }})."
+          body: "Headless build of Godot ${{ env.VERSION }} for macOS.
+See details about the release [here](https://github.com/godotengine/godot/releases/tag/${{ env.VERSION }})."
